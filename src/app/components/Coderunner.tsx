@@ -7,15 +7,18 @@ import Output from "./Output";
 const Coderunner = () => {
   const [code, setCode] = useState<string>(`#include <iostream>
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    int a, b;
+    std::cin >> a >> b;
+    std::cout << a + b << std::endl;
     return 0;
 }`);
+  const [input, setInput] = useState<string>("");
   const [output, setOutput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    setOutput(""); // clear previous output
+    setOutput(""); 
 
     try {
       const res = await fetch("/api/run-code", {
@@ -23,7 +26,7 @@ int main() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ language: "cpp", code }),
+        body: JSON.stringify({ language: "cpp", code, input }), // send input too
       });
 
       if (!res.ok) {
@@ -42,6 +45,7 @@ int main() {
 
   return (
     <div className="flex-1 border border-gray-300 rounded-lg shadow-md flex flex-col bg-white">
+      {/* Header */}
       <div className="flex justify-between items-center bg-gray-100 border-b border-gray-300 px-4 py-2">
         <div className="font-mono font-semibold text-gray-700">main.cpp</div>
         <div>
@@ -64,6 +68,7 @@ int main() {
         </div>
       </div>
 
+      {/* Code editor */}
       <div className="flex-1">
         <Editor
           height="100%"
@@ -80,7 +85,21 @@ int main() {
         />
       </div>
 
-      <Output output={output} />
+      {/* Input + Output side by side */}
+      <div className="flex border-t border-gray-300">
+        {/* Input box */}
+        <textarea
+          className="w-1/2 bg-gray-100 p-3 font-mono text-sm resize-none h-28 outline-none"
+          placeholder="Enter custom input here..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+
+        {/* Output box */}
+        <div className="w-1/2">
+          <Output output={output} />
+        </div>
+      </div>
     </div>
   );
 };
